@@ -1,0 +1,16 @@
+[project]
+name = "fast-step-graph"
+version = "0.1.0"
+description = "A fast implementation of the Stepwise Gaussian Graphical Algorithm"
+authors = [
+    { name = "xrhd", email = "richard.degaki@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "numpy>=1.26.4",
+    "scikit-learn>=1.5.1"
+]
+
+[build-system]
+requires = ["uv_build>=0.8.2,<0.9.0"]
+build-backend = "uv_build"
