@@ -7,7 +7,7 @@ set.seed(0)
 data <- SigmaAR(100, 20, 0.4)
 X <- data$X
 
-# Run FastStepGraph
+# The SigmaAR function already scales the data, so we don't do it again here.
 g <- FastStepGraph(X, alpha_f = 0.22, alpha_b = 0.14, data_scale=TRUE)
 
 # Save the data and results to CSV files

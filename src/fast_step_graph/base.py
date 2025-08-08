@@ -2,6 +2,7 @@ import numpy as np
 from sklearn.base import BaseEstimator
 from sklearn.utils.validation import check_array
 from itertools import combinations
+from sklearn.linear_model import LinearRegression
 
 class FastStepGraph(BaseEstimator):
     """Fast Stepwise Gaussian Graphical Model (FastStepGraph).
@@ -50,17 +51,25 @@ class FastStepGraph(BaseEstimator):
     >>> model.fit(X)
     >>> print(np.around(model.covariance_, decimals=3))
     """
-    def __init__(self, alpha_f, alpha_b=None, nei_max=5, max_iterations=None):
+    def __init__(self, alpha_f, alpha_b=None, nei_max=5, max_iterations=None, data_scale=False):
         self.alpha_f = alpha_f
         self.alpha_b = alpha_b
         self.nei_max = nei_max
         self.max_iterations = max_iterations
+        self.data_scale = data_scale
         self.covariance_ = None
         self.precision_ = None
         self.edges_ = None
 
     def fit(self, X, y=None):
         X = check_array(X, dtype=np.float64, ensure_min_samples=2, ensure_min_features=2)
+        
+        if self.data_scale:
+            X = (X - X.mean(axis=0)) / X.std(axis=0, ddof=1)
+
+        return self._fit(X)
+
+    def _fit(self, X):
         n_samples, n_features = X.shape
 
         if self.alpha_f < self.alpha_b:
@@ -164,6 +173,10 @@ class FastStepGraph(BaseEstimator):
 
     def _compute_omega_and_beta(self, p, e, edges):
         col_var = np.var(e, axis=0, ddof=1)
+        
+        # Add a small epsilon to col_var to avoid division by zero
+        col_var[col_var < np.finfo(float).eps] = np.finfo(float).eps
+
         cor_matrix = np.cov(e, rowvar=False)
         cor_matrix[np.isnan(cor_matrix)] = 0
 
