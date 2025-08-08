@@ -1,9 +1,9 @@
 import numpy as np
-from sklearn.base import BaseEstimator, CovarianceMixin
+from sklearn.base import BaseEstimator
 from sklearn.utils.validation import check_array
 from itertools import combinations
 
-class FastStepGraph(BaseEstimator, CovarianceMixin):
+class FastStepGraph(BaseEstimator):
     """
     Fast Stepwise Gaussian Graphical Model
     """
