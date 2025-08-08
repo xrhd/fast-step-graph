@@ -4,8 +4,80 @@ from sklearn.model_selection import KFold
 from .base import FastStepGraph
 
 class FastStepGraphCV(BaseEstimator):
-    """
-    Fast Stepwise Gaussian Graphical Model with Cross-Validation
+    """FastStepGraphCV: Fast Stepwise Gaussian Graphical Model with Cross-Validation.
+
+    This class finds the optimal regularization parameters (alpha_f and alpha_b)
+    for the FastStepGraph model using cross-validation.
+
+    Parameters
+    ----------
+    alpha_f_min : float, default=0.1
+        Minimum alpha_f value for the cross-validation grid.
+
+    alpha_f_max : float, default=0.9
+        Maximum alpha_f value for the cross-validation grid.
+
+    n_folds : int, default=10
+        Number of folds for the cross-validation.
+
+    b_coef : float, default=0.5
+        The coefficient to determine alpha_b from alpha_f (alpha_b = b_coef * alpha_f)
+        during the initial search for the optimal alpha_f.
+
+    n_alpha : int, default=20
+        Number of alpha_f values to test in the grid.
+
+    nei_max : int, default=5
+        Maximum number of variables in every neighborhood.
+
+    max_iterations : int, default=None
+        Maximum number of iterations. If None, it is set to p*(p-1).
+
+    parallel : bool, default=False
+        If True, run cross-validation in parallel. (Not yet implemented)
+
+    n_cores : int, default=None
+        Number of cores to use for parallel processing. (Not yet implemented)
+
+    Attributes
+    ----------
+    alpha_f_opt_ : float
+        The optimal value for alpha_f found during cross-validation.
+
+    alpha_b_opt_ : float
+        The optimal value for alpha_b found during cross-validation.
+
+    cv_loss_ : float
+        The minimum cross-validation loss achieved with the optimal parameters.
+
+    covariance_ : ndarray of shape (n_features, n_features)
+        Estimated covariance matrix using the optimal parameters.
+
+    precision_ : ndarray of shape (n_features, n_features)
+        Estimated precision matrix using the optimal parameters.
+
+    edges_ : ndarray of shape (n_edges, 2)
+        Estimated set of edges using the optimal parameters.
+
+    beta_ : ndarray of shape (n_features, n_features)
+        Estimated regression coefficients using the optimal parameters.
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from fast_step_graph.cv import FastStepGraphCV
+    >>> true_cov = np.array([[0.8, 0.0, 0.2, 0.0],
+    ...                      [0.0, 0.4, 0.0, 0.0],
+    ...                      [0.2, 0.0, 0.3, 0.1],
+    ...                      [0.0, 0.0, 0.1, 0.7]])
+    >>> np.random.seed(0)
+    >>> X = np.random.multivariate_normal(mean=[0, 0, 0, 0],
+    ...                                   cov=true_cov,
+    ...                                   size=200)
+    >>> model = FastStepGraphCV(nei_max=3)
+    >>> model.fit(X)
+    >>> print(f"Optimal alpha_f: {model.alpha_f_opt_:.3f}")
+    >>> print(f"Optimal alpha_b: {model.alpha_b_opt_:.3f}")
     """
     def __init__(self, alpha_f_min=0.1, alpha_f_max=0.9, n_folds=10, b_coef=0.5, 
                  n_alpha=20, nei_max=5, max_iterations=None, parallel=False, n_cores=None):
