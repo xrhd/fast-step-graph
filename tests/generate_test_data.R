@@ -11,9 +11,9 @@ X <- data$X
 g <- FastStepGraph(X, alpha_f = 0.22, alpha_b = 0.14, data_scale=TRUE)
 
 # Save the data and results to CSV files
-write.csv(X, "tests/data/X.csv", row.names = FALSE)
-write.csv(g$Omega, "tests/data/omega.csv", row.names = FALSE)
-write.csv(g$beta, "tests/data/beta.csv", row.names = FALSE)
-write.csv(g$Edges, "tests/data/edges.csv", row.names = FALSE)
+write.csv(X, "tests/fixtures/data/X.csv", row.names = FALSE)
+write.csv(g$Omega, "tests/fixtures/omega.csv", row.names = FALSE)
+write.csv(g$beta, "tests/fixtures/beta.csv", row.names = FALSE)
+write.csv(g$Edges, "tests/fixtures/edges.csv", row.names = FALSE)
 
 print("Test data generated successfully.") 

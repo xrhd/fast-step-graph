@@ -162,10 +162,12 @@ class FastStepGraph(BaseEstimator):
             f_ij = np.abs(f_ij[np.tril_indices(f_ij.shape[0], -1)])
             f_ij[np.isnan(f_ij)] = 0
             
-            h = np.where(edges_a[:, 0] > 0)[0]
+            # An active edge (i,j) has i >= 0 and j > i, so i+j > 0.
+            # A removed/inactive edge is set to [0,0], so sum is 0.
+            h = np.where(np.sum(edges_a, axis=1) > 0)[0]
             f_ij[h] = 0
         
-        self.edges_ = edges_a[edges_a[:, 1] > 0]
+        self.edges_ = edges_a[np.sum(edges_a, axis=1) > 0]
         self.precision_, self.beta_ = self._compute_omega_and_beta(n_features, e, self.edges_)
         self.covariance_ = np.linalg.inv(self.precision_)
 
