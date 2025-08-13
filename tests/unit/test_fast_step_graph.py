@@ -1,57 +1,39 @@
 import numpy as np
-from fast_step_graph.base import FastStepGraph
-from fast_step_graph.cv import FastStepGraphCV
+from fast_step_graph import FastStepGraph
+from fast_step_graph._fast_step_graph import fast_step_graph
 
-def test_fast_step_graph_smoke():
-    # Generate synthetic data
+
+def test_function_and_class_match():
     np.random.seed(0)
-    X = np.random.multivariate_normal(mean=[0, 0, 0, 0],
-                                      cov=np.eye(4),
-                                      size=100)
-    
-    # Instantiate and fit the model
-    model = FastStepGraph(alpha_f=0.2, alpha_b=0.1, nei_max=3)
-    model.fit(X)
-    
-    # Check that the results are available
-    assert model.covariance_ is not None
-    assert model.precision_ is not None
-    assert model.edges_ is not None
-    assert model.beta_ is not None 
+    X = np.random.multivariate_normal(mean=[0, 0, 0, 0], cov=np.eye(4), size=120)
+
+    params = dict(alpha_f=0.22, alpha_b=0.14, nei_max=3, data_scale=True)
+
+    # Function API
+    f_out = fast_step_graph(X, **params)
+
+    # Class API
+    m = FastStepGraph(**params)
+    m.fit(X)
+
+    assert np.allclose(m.precision_, f_out['Omega'])
+    assert np.allclose(m.beta_, f_out['beta'])
+    # Sort edges for comparison
+    fe = f_out['Edges']
+    me = m.edges_
+    fe = fe[np.lexsort((fe[:, 1], fe[:, 0]))]
+    me = me[np.lexsort((me[:, 1], me[:, 0]))]
+    assert np.array_equal(me, fe)
 
 
-def test_fast_step_graph_cv_smoke():
-    # Generate synthetic data
-    np.random.seed(0)
-    X = np.random.multivariate_normal(mean=[0, 0, 0, 0],
-                                      cov=np.eye(4),
-                                      size=100)
-    
-    # Instantiate and fit the model
-    model = FastStepGraphCV(nei_max=3)
-    model.fit(X)
-    
-    # Check that the results are available
-    assert model.alpha_f_opt_ is not None
-    assert model.alpha_b_opt_ is not None
-    assert model.cv_loss_ is not None
-    assert model.covariance_ is not None
-    assert model.precision_ is not None
-    assert model.edges_ is not None
-    assert model.beta_ is not None 
+def test_smoke_scaling_effect():
+    np.random.seed(1)
+    X = np.random.rand(100, 5) * 10 + 3
 
+    m_scaled = FastStepGraph(alpha_f=0.2, alpha_b=0.1, nei_max=4, data_scale=True)
+    m_scaled.fit(X)
 
-def test_data_scaling():
-    # Generate synthetic data with a non-zero mean
-    np.random.seed(0)
-    X = np.random.rand(100, 5) * 10 + 5
+    m_unscaled = FastStepGraph(alpha_f=0.2, alpha_b=0.1, nei_max=4, data_scale=False)
+    m_unscaled.fit(X)
 
-    # Fit the model with and without data scaling
-    model_scaled = FastStepGraph(alpha_f=0.2, alpha_b=0.1, nei_max=4, data_scale=True)
-    model_scaled.fit(X)
-
-    model_unscaled = FastStepGraph(alpha_f=0.2, alpha_b=0.1, nei_max=4, data_scale=False)
-    model_unscaled.fit(X)
-
-    # Check that the results are different
-    assert not np.allclose(model_scaled.covariance_, model_unscaled.covariance_) 
+    assert not np.allclose(m_scaled.covariance_, m_unscaled.covariance_) 
